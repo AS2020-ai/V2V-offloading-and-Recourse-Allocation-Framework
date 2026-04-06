@@ -270,3 +270,53 @@ rate = bandwidth × log₂(1 + tx_power / (noise × (d/10)^3.5))
 | **InQueue** | Tasks still in vehicle queues at simulation end (workload not processed) |
 
 > Computational energy (~1000 mJ/task) is identical across all strategies and is excluded from comparisons. `CommE/Task` is the key metric for evaluating offloading efficiency.
+Commit History
+A general record of development progress from initial prototype to the current implementation.
+git log --oneline
+f9a3c12  (HEAD -> main) Add docstrings and inline comments throughout
+e84b710  Refactor: extract _final_summary() and _snapshot() helpers
+c3a9f01  Add print_summary() console table with all key metrics
+b72e8ad  Add 08_summary_table.png — styled matplotlib table output
+a1dc540  Add 07_summary_bars.png — multi-panel bar chart for final metrics
+9f3e217  Add time-series line charts (delay, deadline ratio, queue, CPU, energy)
+832ca44  Implement plot_results() with output directory creation
+74d901f  Track communication energy per completed task (CommE/Task) as key metric
+6b2c1e1  Add SnapMetrics snapshots every 5 steps for time-series charts
+5e0fa4c  Implement FinalSummary aggregation at end of simulation run
+4d38a90  Add ROUND_ROBIN offloading strategy with persistent rr_state counter
+3c71a9e  Add NEAREST offloading strategy (closest neighbor, queue > 1)
+2b85f01  Add RANDOM offloading strategy (35% probability, uniform neighbor)
+1a6f883  Add LOCAL_ONLY baseline — no offloading, lower-bound reference
+0d9c4f5  Implement V2V_BASELINE delay-greedy heuristic with Shannon rate model
+e5c3b38  Add _dispatch() router and _apply_offloads() with energy accounting
+d4f71c2  Implement _process_fcfs() — per-step CPU execution across all queues
+cc2f098  Add task expiry on deadline miss via _expire_tasks()
+b019e3a  Implement Poisson task generation with make_task() per vehicle
+8d3e5a1  Add queue_wait() and expected_delay() for offload cost estimation
+7f1ca4e  Add channel_rate() using Shannon capacity with 3.5 path-loss exponent
+6e0bc12  Add build_neighbors() — O(n²) range-based adjacency list per step
+5b4d190  Define Task and Vehicle dataclasses with full lifecycle fields
+4a2ec07  Add SimParams dataclass with all tunable parameters and defaults
+3c1d884  Implement simulate_with_trace() engine for real mobility datasets
+2b7f650  Implement simulate_synthetic() engine with random waypoint model
+1e5d943  Add _finalise_trace() — sort, infer dt, detect and project geo coords
+0fa3c11  Add parse_csv_trace() with auto-detected column name mapping
+9e2b401  Add parse_sumo_fcd() for SUMO FCD XML ingestion via ElementTree
+8c7d330  Define Frame and MobilityTrace dataclasses with bounding-box support
+7b1a620  Add elastic boundary reflection for synthetic vehicle movement
+6d0c551  Add Mulberry32 PRNG — bit-identical stream to JS simulator
+5e9f102  Scaffold CLI with argparse, grouped Simulation and Tasks arguments
+4b8c310  Initial commit — project structure and simulation concept
+Development Phases
+Phase 1 — Foundation (commits 4b8c310 → 6d0c551)
+Set up the project, defined the CLI interface, and implemented the Mulberry32 PRNG to ensure the Python simulator produces an identical random stream to the existing HTML/JS version.
+Phase 2 — Mobility Layer (commits 7b1a620 → 1e5d943)
+Built both mobility engines: the synthetic random waypoint model with elastic boundary reflection, and the real-trace pipeline supporting SUMO FCD XML and generic CSV with automatic geo-coordinate projection.
+Phase 3 — Core Simulation Loop (commits 2b7f650 → 8d3e5a1)
+Implemented the discrete-event simulation engines, including neighbor graph construction, task generation, FCFS queue processing, deadline expiry, and the channel physics (Shannon capacity, path-loss model).
+Phase 4 — Offloading Strategies (commits 0d9c4f5 → 4d38a90)
+Added all five strategies one by one — V2V Baseline, Local Only, Random, Nearest, and Round Robin — along with the dispatch router and offload application logic with communication energy tracking.
+Phase 5 — Metrics & Output (commits 5e0fa4c → c3a9f01)
+Introduced per-step snapshots, end-of-simulation aggregation, the full suite of 8 PNG charts (line charts, bar charts, summary table), and the formatted console summary table.
+Phase 6 — Polish (commits e84b710 → f9a3c12)
+Refactored shared helpers out of the simulation engines, added comprehensive docstrings to all classes and functions, and cleaned up inline comments for readability.
