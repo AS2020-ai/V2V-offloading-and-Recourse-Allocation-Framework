@@ -17,7 +17,7 @@ A Python discrete-event simulator for benchmarking **Vehicle-to-Vehicle (V2V) co
 - [Output & Charts](#output--charts)
 - [Architecture](#architecture)
 - [Key Metrics](#key-metrics)
-
+- [Commit History](#commit-history)
 ---
 
 ## Overview
