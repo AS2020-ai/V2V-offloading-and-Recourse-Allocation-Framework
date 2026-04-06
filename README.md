@@ -55,22 +55,22 @@ No additional setup is required. The simulator is a single self-contained script
 
 ```bash
 # Run all 5 strategies with default synthetic mobility (25 vehicles, 120 s)
-python v2v_simulator.py
+python v2v_simulator_final.py
 
 # Load a SUMO FCD XML trace
-python v2v_simulator.py --trace trace.fcd.xml
+python v2v_simulator_final.py --trace trace.fcd.xml
 
 # Load a generic CSV trace
-python v2v_simulator.py --trace mobility.csv
+python v2v_simulator_final.py --trace mobility.csv
 
 # Run only two specific strategies
-python v2v_simulator.py --strategies V2V_BASELINE LOCAL_ONLY
+python v2v_simulator_final.py --strategies V2V_BASELINE LOCAL_ONLY
 
 # Customise vehicles, duration, and task arrival rate
-python v2v_simulator.py --N 30 --T 200 --arrival-rate 10 --seed 7
+python v2v_simulator_final.py --N 30 --T 200 --arrival-rate 10 --seed 7
 
 # Run without generating plots
-python v2v_simulator.py --no-plots
+python v2v_simulator_final.py --no-plots
 ```
 
 ---
@@ -78,7 +78,7 @@ python v2v_simulator.py --no-plots
 ## Usage
 
 ```
-python v2v_simulator.py [options]
+python v2v_simulator_final.py [options]
 ```
 
 ### General Options
