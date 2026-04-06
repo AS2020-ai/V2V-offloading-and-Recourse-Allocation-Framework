@@ -221,7 +221,7 @@ Local Only              1012       88     1.891     61.0   879     342       0.0
 ══════════════════════════════════════════════════════════════════════
 ```
 
-> **Note:** `Generated` and `InQueue` must be identical across all strategies. A mismatch indicates a shared-RNG bug.
+> **Note:** `Generated` must be identical across all strategies. A mismatch indicates a shared-RNG bug.
 
 ---
 
