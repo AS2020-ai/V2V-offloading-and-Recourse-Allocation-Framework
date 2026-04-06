@@ -114,7 +114,7 @@ python v2v_simulator_final.py [options]
 
 ---
 
-## Mobility Modes
+## Mobility Modes/ Datasets
 
 ### Synthetic (default)
 Uses a seeded **Random Waypoint** model. Vehicles pick random destinations and travel at random speeds within `[0, max_speed]`. Boundaries are elastically reflective. No trace file required — configure with `--N`, `--T`, `--map-size`, `--max-speed`, and `--seed`.
