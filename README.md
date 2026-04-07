@@ -1,6 +1,6 @@
 # V2V Task Offloading Simulator based on Greedy Algorithm
 
-A Python discrete-event simulator for benchmarking **Vehicle-to-Vehicle (V2V) computational task offloading strategies**. It is an exact translation of the companion HTML/JS simulator, sharing the same RNG stream and physics model for cross-platform reproducibility.
+A Python discrete-event simulator for benchmarking **Vehicle-to-Vehicle (V2V) computational task offloading strategy**. 
 
 ---
 
