@@ -267,7 +267,6 @@ rate = bandwidth × log₂(1 + tx_power / (noise × (d/10)^3.5))
 | **CommE/Task (mJ)** | ★ Communication energy consumed per completed task — primary differentiator between strategies |
 | **Offload Ratio (%)** | Fraction of completed tasks that were offloaded to a neighbor |
 | **CPU Util (%)** | Average CPU utilisation across all vehicles over the simulation |
-| **InQueue** | Tasks still in vehicle queues at simulation end (workload not processed) |
 
 > Computational energy (~1000 mJ/task) is identical across all strategies and is excluded from comparisons. `CommE/Task` is the key metric for evaluating offloading efficiency.
 
