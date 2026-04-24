@@ -53,7 +53,7 @@ class SimParams:
     Central configuration dataclass holding all simulation parameters.
 
     Groups:
-      - Synthetic mobility:  number of vehicles, map dimensions, speed limits.
+      - Synthetic mobility:  number of vehicles (N), map dimensions, speed limits.
       - Simulation time:     total duration (T), step size (dt), RNG seed.
       - Network:             communication range, channel bandwidth, TX power,
                              and noise floor used for Shannon-capacity calculations.
