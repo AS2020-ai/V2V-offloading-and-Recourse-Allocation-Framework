@@ -50,7 +50,7 @@ import matplotlib.pyplot as plt
 @dataclass
 class SimParams:
     """
-    Central configuration dataclass holding all tunable simulation parameters.
+    Central configuration dataclass holding all simulation parameters.
 
     Groups:
       - Synthetic mobility:  number of vehicles, map dimensions, speed limits.
