@@ -469,8 +469,7 @@ def strategy_v2v_baseline(
     For each unstarted task, compares the expected local delay against the
     expected delay at every one-hop neighbor (including transmission time).
     Offloads to the neighbor with the lowest total expected delay, if any
-    neighbor beats the local estimate.  No urgency weighting, load penalty,
-    link-stability check, or energy term.
+    neighbor beats the local estimate.  
 
     Args:
         vehicles  List of active Vehicle objects.
