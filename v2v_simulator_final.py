@@ -291,9 +291,6 @@ def channel_rate(d: float, bw: float, tx_p: float, noise: float) -> float:
     """
     Estimate the V2V wireless channel capacity (bits/s) using the Shannon formula.
 
-    Models path loss with a 3.5 exponent (typical urban V2V environment) scaled
-    to a reference distance of 10 m.  SNR is clamped to 1e-10 to avoid log(0).
-
     Args:
         d      Distance between vehicles (m); clamped to 1 m minimum.
         bw     Channel bandwidth (Hz).
