@@ -5,9 +5,9 @@ Exact translation of the final HTML/JS simulator (v2v_dataset_simulator.html).
 
 Mobility modes
 --------------
-  Synthetic   Random-waypoint model (no file needed)
+  Synthetic   Random model (no file needed)
   SUMO FCD    SUMO --fcd-output trace.fcd.xml
-  CSV         TAPASCologne / LuST / any generic CSV
+  CSV         Any generic CSV
 
 Strategies
 ----------
