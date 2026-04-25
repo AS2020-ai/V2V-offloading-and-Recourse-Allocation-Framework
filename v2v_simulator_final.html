@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>V2V Simulator — Comparison</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap');
+:root{
+  --bg0:#f8f9fc;--bg1:#ffffff;--bg2:#f1f4f9;--bg3:#e8edf5;
+  --border:#dde3ee;--border2:#c8d0e0;
+  --t0:#1a2340;--t1:#3a4a6a;--t2:#6b7a99;--t3:#a0aec0;
+  --acc:#0099aa;--acc2:#2272c3;--warn:#d97706;--err:#dc2626;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg0);color:var(--t0);font-family:'Inter',sans-serif;font-size:13px;min-height:100vh;overflow-x:hidden}
+
+/* HEADER */
+header{background:var(--bg1);border-bottom:1px solid var(--border);padding:13px 22px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:100}
+.h-logo{display:flex;align-items:center;gap:10px}
+.h-icon{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.h-title{font-size:14px;font-weight:600;color:var(--t0);font-family:'JetBrains Mono'}
+.h-sub{font-size:10px;color:var(--t2);margin-top:1px}
+.pills{display:flex;gap:5px;flex-wrap:wrap}
+.pill{padding:4px 11px;border-radius:20px;font-size:10px;cursor:pointer;font-family:'JetBrains Mono';border:1px solid var(--border);color:var(--t2);background:transparent;transition:all .15s;white-space:nowrap}
+.pill.on{background:color-mix(in srgb,var(--c) 15%,transparent);border-color:var(--c);color:var(--c)}
+
+/* LAYOUT */
+.layout{display:flex;min-height:calc(100vh - 63px)}
+
+/* SIDEBAR */
+aside{width:260px;min-width:260px;background:var(--bg1);border-right:1px solid var(--border);overflow-y:auto;padding:14px 13px}
+aside::-webkit-scrollbar{width:3px}
+aside::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.slabel{font-size:9px;color:var(--t3);letter-spacing:2px;font-family:'JetBrains Mono';margin:13px 0 7px;text-transform:uppercase}
+.sr{margin-bottom:10px}
+.sr-top{display:flex;justify-content:space-between;margin-bottom:3px}
+.sr-top span{font-size:11px;color:var(--t2)}
+.sr-top .v{color:var(--acc);font-family:'JetBrains Mono';font-size:11px}
+input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer;height:3px;border-radius:2px}
+
+#run-btn{margin-top:14px;width:100%;padding:11px 0;background:linear-gradient(90deg,var(--acc),var(--acc2));color:var(--bg0);border:none;border-radius:9px;font-weight:700;font-size:13px;font-family:'JetBrains Mono';cursor:pointer}
+#run-btn:disabled{background:var(--bg3);color:var(--t3);cursor:not-allowed}
+.pbar{margin-top:7px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.pfill{height:100%;background:var(--acc);border-radius:2px;transition:width .2s;width:0}
+.pstatus{font-size:10px;color:var(--t2);font-family:'JetBrains Mono';text-align:center;margin-top:4px;min-height:14px}
+
+.leg-row{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* MAIN */
+main{flex:1;overflow-y:auto;padding:18px 20px}
+main::-webkit-scrollbar{width:3px}
+main::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* DATASET PANEL */
+.ds-panel{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:18px;margin-bottom:18px}
+.ds-panel h2{font-size:12px;font-family:'JetBrains Mono';color:var(--acc);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.ds-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.dstab{padding:7px 14px;border-radius:8px;font-size:11px;cursor:pointer;font-family:'JetBrains Mono';border:1px solid var(--border);color:var(--t2);background:transparent;transition:all .15s}
+.dstab.on{border-color:var(--acc);color:var(--acc);background:rgba(0,229,200,.08)}
+
+/* UPLOAD ZONE */
+.upload-zone{border:2px dashed var(--border2);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--acc);background:rgba(0,229,200,.04)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:32px;margin-bottom:8px;opacity:.5}
+.upload-title{font-size:13px;color:var(--t1);margin-bottom:4px}
+.upload-sub{font-size:11px;color:var(--t2)}
+.upload-status{margin-top:12px;padding:10px;border-radius:8px;font-size:11px;font-family:'JetBrains Mono';display:none}
+.upload-status.ok{background:rgba(0,229,200,.1);border:1px solid rgba(0,229,200,.3);color:var(--acc)}
+.upload-status.err{background:rgba(255,64,128,.1);border:1px solid rgba(255,64,128,.3);color:var(--err)}
+
+/* FORMAT GUIDE */
+.fmt-box{background:var(--bg3);border-radius:8px;padding:14px;margin-top:12px}
+.fmt-box h4{font-size:10px;color:var(--acc);font-family:'JetBrains Mono';margin-bottom:8px}
+pre.fmt{font-size:10px;color:var(--t2);line-height:1.8;white-space:pre;overflow-x:auto;font-family:'JetBrains Mono'}
+.ds-info{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.ds-stat{background:var(--bg3);border-radius:7px;padding:10px;text-align:center}
+.ds-stat .dv{font-size:15px;font-weight:700;font-family:'JetBrains Mono';color:var(--acc)}
+.ds-stat .dl{font-size:9px;color:var(--t3);margin-top:2px}
+
+/* RESULTS */
+.sgrid{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:18px}
+.scard{flex:1 1 160px;background:var(--bg2);border-radius:11px;padding:13px 14px;border:1px solid var(--border)}
+.scard .sname{font-size:9px;font-family:'JetBrains Mono';letter-spacing:1px;margin-bottom:9px}
+.scard .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
+.mi .mv{font-size:13px;font-weight:600;font-family:'JetBrains Mono'}
+.mi .ml{font-size:9px;color:var(--t3);margin-top:1px}
+.tabs{display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:6px 13px;border-radius:17px;font-size:11px;cursor:pointer;font-family:'JetBrains Mono';border:1px solid var(--border);color:var(--t2);background:transparent;transition:all .15s}
+.tab.on{border-color:var(--acc);color:var(--acc);background:rgba(0,229,200,.08)}
+.panel{display:none}.panel.on{display:block}
+.cc{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:16px 14px;margin-bottom:14px}
+.cc-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.cc-title{font-size:11px;color:var(--t1);font-family:'JetBrains Mono';letter-spacing:.3px}
+.dlbtn{background:rgba(0,229,200,.07);border:1px solid rgba(0,229,200,.2);color:var(--acc);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:10px;font-family:'JetBrains Mono'}
+.bgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:860px){.bgrid{grid-template-columns:1fr}}
+
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:40vh;text-align:center}
+.eicon{font-size:50px;opacity:.1;margin-bottom:14px}
+.empty h2{font-family:'JetBrains Mono';color:var(--t3);margin-bottom:8px}
+.empty p{color:var(--t3);max-width:420px;font-size:12px;line-height:1.7}
+
+/* DATASET MODE BADGE */
+.mode-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;font-size:10px;font-family:'JetBrains Mono';border:1px solid;margin-left:8px}
+.mode-badge.real{border-color:var(--acc);color:var(--acc);background:rgba(0,229,200,.1)}
+.mode-badge.synthetic{border-color:var(--t3);color:var(--t3)}
+
+/* ── TOPOLOGY PANEL ───────────────────────────────────── */
+.topo-shell{background:var(--bg1);border:1px solid var(--border);border-radius:13px;overflow:hidden;margin-bottom:14px}
+.topo-top{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;background:var(--bg2)}
+.topo-heading{font-size:11px;font-family:'JetBrains Mono';color:var(--t1);display:flex;align-items:center;gap:8px}
+.topo-badge{padding:2px 8px;border-radius:10px;font-size:9px;font-family:'JetBrains Mono';background:rgba(0,153,170,.12);border:1px solid rgba(0,153,170,.3);color:var(--acc)}
+.topo-ctrls{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tbtn{padding:5px 11px;border-radius:7px;border:1px solid var(--border2);background:var(--bg3);color:var(--t1);font-size:10px;font-family:'JetBrains Mono';cursor:pointer;transition:all .15s}
+.tbtn:hover,.tbtn.on{border-color:var(--acc);color:var(--acc);background:rgba(0,153,170,.08)}
+.topo-strat-row{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg1)}
+.tstrat-pill{padding:4px 11px;border-radius:14px;font-size:10px;font-family:'JetBrains Mono';cursor:pointer;border:1px solid var(--border);color:var(--t2);background:transparent;transition:all .15s;white-space:nowrap}
+.tstrat-pill.on{border-color:var(--c,#0099aa);color:var(--c,#0099aa);background:rgba(0,153,170,.09)}
+.topo-canvas-wrap{position:relative;background:#f3f6fc;border-bottom:1px solid var(--border)}
+#topo-cv{width:100%;display:block;cursor:crosshair}
+.topo-timeline-row{padding:9px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.topo-timeline-row input[type=range]{flex:1;accent-color:var(--acc)}
+.ttime{font-size:10px;font-family:'JetBrains Mono';color:var(--acc);min-width:54px;text-align:right}
+.topo-speed-row{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--t2);font-family:'JetBrains Mono'}
+.topo-speed-row input{width:70px;accent-color:var(--acc)}
+.topo-info-bar{padding:9px 16px;display:flex;gap:20px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:var(--bg2)}
+.tstat{font-size:10px;color:var(--t2);font-family:'JetBrains Mono'}
+.tstat strong{color:var(--acc)}
+.topo-legend-row{padding:9px 16px;display:flex;gap:14px;flex-wrap:wrap}
+.tleg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t2)}
+.tleg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.tleg-line{width:18px;height:3px;border-radius:2px;flex-shrink:0}
+.topo-tooltip{position:absolute;background:rgba(20,30,58,.93);color:#e8f0ff;font-size:9px;font-family:'JetBrains Mono';padding:7px 10px;border-radius:7px;pointer-events:none;line-height:1.75;white-space:nowrap;display:none;z-index:10;border:1px solid rgba(0,153,170,.4)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-logo">
+    <div class="h-icon">🚗</div>
+    <div>
+      <div class="h-title">V2V Simulator
+        <span class="mode-badge synthetic" id="mode-badge">SYNTHETIC</span>
+      </div>
+      <div class="h-sub">Real Dataset Integration · SUMO FCD / CSV</div>
+    </div>
+  </div>
+  <div class="pills" id="pills"></div>
+</header>
+
+<div class="layout">
+<aside>
+  <div class="slabel">TASK PARAMETERS</div>
+  <div class="sr" id="sr-dsMin"></div>
+  <div class="sr" id="sr-dsMax"></div>
+  <div class="sr" id="sr-cMin"></div>
+  <div class="sr" id="sr-cMax"></div>
+  <div class="sr" id="sr-dlMin"></div>
+  <div class="sr" id="sr-dlMax"></div>
+
+  <div class="slabel">NETWORK</div>
+  <div class="sr" id="sr-R"></div>
+  <div class="sr" id="sr-lam"></div>
+
+  <div class="slabel">COMPUTE</div>
+  <div class="sr" id="sr-cpuMin"></div>
+  <div class="sr" id="sr-cpuMax"></div>
+
+  <div class="slabel">SIMULATION (synthetic only)</div>
+  <div class="sr" id="sr-N"></div>
+  <div class="sr" id="sr-T"></div>
+  <div class="sr" id="sr-spd"></div>
+  <div class="sr" id="sr-seed"></div>
+
+  <button id="run-btn" onclick="runAll()">▶ RUN SIMULATION</button>
+  <div class="pbar"><div class="pfill" id="prog"></div></div>
+  <div class="pstatus" id="pstatus"></div>
+
+  <div class="slabel" style="margin-top:14px">STRATEGIES</div>
+  <div id="legend"></div>
+</aside>
+
+<main>
+  <!-- ══ DATASET LOADER ══════════════════════════════════════════ -->
+  <div class="ds-panel">
+    <h2>📂 Mobility Dataset
+      <span style="font-size:10px;color:var(--t2);font-weight:400">Upload a trace file or use synthetic mobility</span>
+    </h2>
+
+    <div class="ds-tabs">
+      <button class="dstab on" onclick="setDsTab('sumo',this)">SUMO FCD (.xml)</button>
+      <button class="dstab" onclick="setDsTab('generic',this)">Generic CSV</button>
+      <button class="dstab" onclick="setDsTab('synthetic',this)">Synthetic (no file)</button>
+    </div>
+
+    <!-- SUMO FCD -->
+    <div id="tab-sumo">
+      <div class="upload-zone" id="zone-sumo" ondrop="dropFile(event,'sumo')" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')">
+        <input type="file" accept=".xml,.fcd" onchange="loadFile(event,'sumo')"/>
+        <div class="upload-icon">📄</div>
+        <div class="upload-title">Drop SUMO FCD XML or click to browse</div>
+        <div class="upload-sub">Generated via: <code style="color:var(--acc)">sumo --fcd-output trace.fcd.xml</code></div>
+      </div>
+      <div class="upload-status" id="status-sumo"></div>
+      <div class="fmt-box">
+        <h4>EXPECTED FORMAT — SUMO FCD XML</h4>
+        <pre class="fmt">&lt;fcd-export&gt;
+  &lt;timestep time="0.00"&gt;
+    &lt;vehicle id="veh0" x="312.4" y="187.2" speed="13.5" angle="90"/&gt;
+    &lt;vehicle id="veh1" x="421.1" y="203.8" speed="8.2"  angle="270"/&gt;
+  &lt;/timestep&gt;
+  &lt;timestep time="0.50"&gt;
+    ...
+  &lt;/timestep&gt;
+&lt;/fcd-export&gt;</pre>
+        <div style="margin-top:10px;font-size:10px;color:var(--t2);line-height:1.8">
+          <strong style="color:var(--t1)">How to generate from SUMO:</strong><br>
+          1. Install SUMO: <code style="color:var(--acc)">sudo apt install sumo</code> or download from sumo.dlr.de<br>
+          2. Run: <code style="color:var(--acc)">sumo -c your.sumocfg --fcd-output trace.fcd.xml --step-length 0.5</code><br>
+          3. Upload the resulting <code style="color:var(--acc)">trace.fcd.xml</code> here
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Generic CSV -->
+    <div id="tab-generic" style="display:none">
+      <div class="upload-zone" id="zone-generic" ondrop="dropFile(event,'generic')" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')">
+        <input type="file" accept=".csv,.txt" onchange="loadFile(event,'generic')"/>
+        <div class="upload-icon">📋</div>
+        <div class="upload-title">Drop any mobility CSV</div>
+        <div class="upload-sub">Auto-detects column names for id, time, x, y, speed</div>
+      </div>
+      <div class="upload-status" id="status-generic"></div>
+      <div class="fmt-box">
+        <h4>AUTO-DETECTED COLUMN NAMES</h4>
+        <pre class="fmt">ID columns:    id, vehicle_id, vehicleId, node, car
+Time columns:  time, t, timestamp, timestep
+X columns:     x, lon, longitude, pos_x, X
+Y columns:     y, lat, latitude, pos_y, Y
+Speed columns: speed, v, velocity, spd (optional)</pre>
+        <div style="margin-top:8px;font-size:10px;color:var(--t2)">
+          First row must be a header. Delimiter: comma or semicolon. Missing speed → estimated from position delta.
+        </div>
+      </div>
+    </div>
+
+    <!-- Synthetic -->
+    <div id="tab-synthetic" style="display:none">
+      <div style="background:var(--bg3);border-radius:9px;padding:16px;border:1px solid var(--border2)">
+        <div style="font-size:12px;color:var(--t1);margin-bottom:8px">🎲 Random Waypoint Mobility Model</div>
+        <div style="font-size:11px;color:var(--t2);line-height:1.75">
+          Uses the built-in seeded random waypoint model. Configure vehicles, speed, map size and seed in the sidebar.<br><br>
+          This is equivalent to the original simulator mode with no dataset file needed.
+        </div>
+      </div>
+    </div>
+
+    <!-- Dataset stats after load -->
+    <div id="ds-stats" style="display:none;margin-top:14px">
+      <div class="ds-info" id="ds-info"></div>
+    </div>
+  </div>
+
+  <!-- ══ RESULTS ═══════════════════════════════════════════════ -->
+  <div id="empty" class="empty">
+    <div class="eicon">🗂️</div>
+    <h2>Load a Dataset or Use Synthetic</h2>
+    <p>Upload a SUMO FCD XML or Generic CSV to run the simulation with real vehicle trajectories. Or switch to <strong style="color:var(--acc)">Synthetic</strong> mode and click Run.</p>
+  </div>
+
+  <div id="results" style="display:none">
+    <div class="sgrid" id="scards"></div>
+    <div class="tabs" id="tabs"></div>
+    <div id="panels"></div>
+  </div>
+</main>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// GLOBAL STATE
+// ══════════════════════════════════════════════════════════════
+const appState = {
+  dsMode: 'sumo',         // sumo | tapas | generic | synthetic
+  trace: null,            // parsed trace: { vehicles:{id:{frames:[{t,x,y,spd}]}}, times:[], dt, T, mapW, mapH }
+  charts: {},
+  sel: {V2V_Greedy:true, LOCAL_ONLY:true, RANDOM:true, NEAREST:false, ROUND_ROBIN:false},
+  P: {},
+};
+
+// ══════════════════════════════════════════════════════════════
+// SEEDED RNG
+// ══════════════════════════════════════════════════════════════
+function makeRng(seed){
+  let s=seed>>>0;
+  return()=>{s+=0x6d2b79f5;let t=Math.imul(s^(s>>>15),1|s);t^=t+Math.imul(t^(t>>>7),61|t);return((t^(t>>>14))>>>0)/4294967296;};
+}
+
+// ══════════════════════════════════════════════════════════════
+// PHYSICS
+// ══════════════════════════════════════════════════════════════
+const vdist=(a,b)=>Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2);
+function channelRate(d,bw,txP,nF){
+  if(d<1)d=1;return bw*Math.log2(1+txP/(nF*Math.pow(d/10,3.5)));
+}
+const tx2sec=(bytes,rate)=>bytes*8/rate;
+function buildNb(vehicles,range){
+  const n=vehicles.length,nb=Array.from({length:n},()=>[]);
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)
+    if(vdist(vehicles[i],vehicles[j])<=range){nb[i].push(j);nb[j].push(i);}
+  return nb;
+}
+function contTime(v,u,R){
+  const dx=u.x-v.x,dy=u.y-v.y,dvx=u.vx-v.vx,dvy=u.vy-v.vy,dvv=dvx*dvx+dvy*dvy;
+  if(dvv<1e-9)return 999;
+  const tc=-(dx*dvx+dy*dvy)/dvv;
+  if(tc<0){return Math.max(0,(R-Math.sqrt(dx*dx+dy*dy))/Math.sqrt(dvv));}
+  return Math.max(1,tc+2);
+}
+function qWait(task,v){return v.queue.filter(tk=>tk.id<task.id&&tk.completionTime===null).reduce((s,tk)=>s+tk.cycles/v.cpu,0);}
+function expDelay(task,v,tx=0){return tx+qWait(task,v)+task.cycles/v.cpu;}
+
+// ══════════════════════════════════════════════════════════════
+// STRATEGIES (same as main simulator)
+// ══════════════════════════════════════════════════════════════
+
+function v2vGreedy(vehicles,nb,P){
+  const{bandwidth:bw,txPower:txP,noiseFloor:nF}=P,moves=[];
+  vehicles.forEach((v,vi)=>{
+    v.queue.filter(tk=>tk.startTime===null&&!tk._lock).forEach(task=>{
+      if(!nb[vi].length)return;
+      let best={delay:expDelay(task,v),target:vi};
+      nb[vi].forEach(ui=>{
+        const u=vehicles[ui],d=vdist(v,u);
+        const rate=channelRate(d,bw,txP,nF),tx=tx2sec(task.dataSize,rate);
+        const delay=expDelay(task,u,tx);
+        if(delay<best.delay)best={delay,target:ui};
+      });
+      if(best.target!==vi){task._lock=true;moves.push({task,from:vi,to:best.target});}
+    });
+  });
+  return moves;
+}
+function nearest(vehicles,nb){
+  const moves=[];
+  vehicles.forEach((v,vi)=>{
+    v.queue.filter(tk=>tk.startTime===null&&!tk._lock).forEach(task=>{
+      if(!nb[vi].length||v.queue.filter(t=>t.startTime===null).length<=1)return;
+      const ui=nb[vi].reduce((a,b)=>vdist(v,vehicles[a])<vdist(v,vehicles[b])?a:b);
+      task._lock=true;moves.push({task,from:vi,to:ui});
+    });
+  });
+  return moves;
+}
+function randomOffload(vehicles,nb,rng){
+  const moves=[];
+  vehicles.forEach((v,vi)=>{
+    v.queue.filter(tk=>tk.startTime===null&&!tk._lock).forEach(task=>{
+      if(!nb[vi].length)return;
+      if(rng()<0.35){const ui=nb[vi][Math.floor(rng()*nb[vi].length)];task._lock=true;moves.push({task,from:vi,to:ui});}
+    });
+  });
+  return moves;
+}
+function roundRobin(vehicles,nb,rrRef){
+  const moves=[];
+  vehicles.forEach((v,vi)=>{
+    const pend=v.queue.filter(tk=>tk.startTime===null&&!tk._lock);
+    if(!pend.length||!nb[vi].length||pend.length<=1)return;
+    const ui=nb[vi][rrRef.idx%nb[vi].length];rrRef.idx++;
+    pend[0]._lock=true;moves.push({task:pend[0],from:vi,to:ui});
+  });
+  return moves;
+}
+
+// ══════════════════════════════════════════════════════════════
+// DATASET PARSERS
+// ══════════════════════════════════════════════════════════════
+
+// Parse SUMO FCD XML → internal trace format
+function parseSumoFCD(xmlText) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xmlText, 'text/xml');
+  const timesteps = doc.querySelectorAll('timestep');
+  if (!timesteps.length) throw new Error('No <timestep> elements found. Is this a valid SUMO FCD file?');
+
+  const vehicleMap = {}; // id → [{t,x,y,spd}]
+  const times = [];
+
+  timesteps.forEach(ts => {
+    const t = parseFloat(ts.getAttribute('time'));
+    times.push(t);
+    ts.querySelectorAll('vehicle').forEach(v => {
+      const id = v.getAttribute('id');
+      const x  = parseFloat(v.getAttribute('x'));
+      const y  = parseFloat(v.getAttribute('y'));
+      const spd= parseFloat(v.getAttribute('speed') || v.getAttribute('spd') || '0');
+      if (!vehicleMap[id]) vehicleMap[id] = [];
+      vehicleMap[id].push({t, x, y, spd});
+    });
+  });
+
+  return buildTrace(vehicleMap, times);
+}
+
+// Parse CSV (generic)
+function parseCSV(text, mode) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) throw new Error('CSV has fewer than 2 lines.');
+
+  // Detect delimiter
+  const delim = lines[0].includes(';') ? ';' : ',';
+  const headers = lines[0].split(delim).map(h => h.trim().toLowerCase());
+
+  // Map column names
+  const colMap = {
+    id:    findCol(headers, ['id','vehicle_id','vehicleid','node','car','name']),
+    time:  findCol(headers, ['time','t','timestamp','timestep','step']),
+    x:     findCol(headers, ['x','lon','longitude','pos_x','posx','easting']),
+    y:     findCol(headers, ['y','lat','latitude','pos_y','posy','northing']),
+    spd:   findCol(headers, ['speed','v','velocity','spd','vel']),
+  };
+
+  if (colMap.id < 0)   throw new Error(`Cannot find ID column. Headers: ${headers.join(', ')}`);
+  if (colMap.time < 0) throw new Error(`Cannot find time column. Headers: ${headers.join(', ')}`);
+  if (colMap.x < 0)    throw new Error(`Cannot find X/longitude column. Headers: ${headers.join(', ')}`);
+  if (colMap.y < 0)    throw new Error(`Cannot find Y/latitude column. Headers: ${headers.join(', ')}`);
+
+  const vehicleMap = {};
+  const timeSet = new Set();
+
+  for (let i = 1; i < lines.length; i++) {
+    const parts = lines[i].split(delim);
+    if (parts.length < 3) continue;
+    const id   = parts[colMap.id].trim();
+    const t    = parseFloat(parts[colMap.time]);
+    let x      = parseFloat(parts[colMap.x]);
+    let y      = parseFloat(parts[colMap.y]);
+    const spd  = colMap.spd >= 0 ? parseFloat(parts[colMap.spd]) : 0;
+    if (isNaN(t) || isNaN(x) || isNaN(y)) continue;
+    if (!vehicleMap[id]) vehicleMap[id] = [];
+    vehicleMap[id].push({t, x, y, spd});
+    timeSet.add(t);
+  }
+
+  const times = [...timeSet].sort((a,b) => a-b);
+  return buildTrace(vehicleMap, times);
+}
+
+function findCol(headers, names) {
+  for (const n of names) {
+    const i = headers.indexOf(n);
+    if (i >= 0) return i;
+  }
+  return -1;
+}
+
+// Build unified internal trace from vehicleMap + times
+function buildTrace(vehicleMap, times) {
+  const ids = Object.keys(vehicleMap);
+  if (!ids.length) throw new Error('No vehicles found in trace.');
+
+  // Sort each vehicle's frames by time
+  ids.forEach(id => vehicleMap[id].sort((a,b) => a.t - b.t));
+
+  // Detect dt (median time step)
+  const dts = [];
+  for (let i = 1; i < times.length && i < 20; i++) dts.push(times[i] - times[i-1]);
+  const dt = dts.length ? dts.sort((a,b)=>a-b)[Math.floor(dts.length/2)] : 0.5;
+
+  // Normalise coordinates to metres (if geo-coordinates detected: |x| > 180 or |y| > 90)
+  let allX = ids.flatMap(id => vehicleMap[id].map(f => f.x));
+  let allY = ids.flatMap(id => vehicleMap[id].map(f => f.y));
+  const isGeo = Math.abs(allX[0]) < 180 && Math.abs(allY[0]) < 90 &&
+                (Math.max(...allX) - Math.min(...allX)) < 5; // degrees span < 5°
+
+  let xMin = Math.min(...allX), xMax = Math.max(...allX);
+  let yMin = Math.min(...allY), yMax = Math.max(...allY);
+
+  if (isGeo) {
+    // Convert lat/lon to metres via equirectangular approximation
+    const latMid = (yMin + yMax) / 2;
+    const mPerDegLon = 111320 * Math.cos(latMid * Math.PI / 180);
+    const mPerDegLat = 110540;
+    ids.forEach(id => vehicleMap[id].forEach(f => {
+      f.x = (f.x - xMin) * mPerDegLon;
+      f.y = (f.y - yMin) * mPerDegLat;
+    }));
+    allX = ids.flatMap(id => vehicleMap[id].map(f => f.x));
+    allY = ids.flatMap(id => vehicleMap[id].map(f => f.y));
+    xMin = 0; xMax = Math.max(...allX);
+    yMin = 0; yMax = Math.max(...allY);
+  }
+
+  // Estimate speed from position delta if missing
+  ids.forEach(id => {
+    const frames = vehicleMap[id];
+    frames.forEach((f, i) => {
+      if (!f.spd || isNaN(f.spd)) {
+        if (i > 0) {
+          const prev = frames[i-1];
+          const d = Math.sqrt((f.x-prev.x)**2+(f.y-prev.y)**2);
+          const elapsed = Math.max(f.t-prev.t, 0.01);
+          f.spd = d / elapsed;
+        } else {
+          f.spd = 0;
+        }
+      }
+    });
+  });
+
+  // Build frame lookup: for a given global time, get each vehicle's interpolated position
+  // frameByTime[stepIdx] = Map(vehicleId → {x,y,vx,vy,spd})
+  const T = times[times.length - 1] - times[0];
+  const t0 = times[0];
+
+  return {
+    vehicleMap,
+    times,
+    t0,
+    T,
+    dt,
+    mapW: xMax - xMin + 1,
+    mapH: yMax - yMin + 1,
+    N: ids.length,
+    ids,
+    isGeo,
+  };
+}
+
+// Get vehicle positions at time t (interpolated)
+function getPositions(trace, t, rng, cpuMin, cpuMax) {
+  const {vehicleMap, t0, dt} = trace;
+  const vehicles = [];
+
+  trace.ids.forEach((id, idx) => {
+    const frames = vehicleMap[id];
+    if (!frames.length) return;
+
+    // Find surrounding frames
+    const tAbs = t + t0;
+    let lo = frames[0], hi = frames[frames.length - 1];
+    for (let i = 0; i < frames.length - 1; i++) {
+      if (frames[i].t <= tAbs && frames[i+1].t >= tAbs) {
+        lo = frames[i]; hi = frames[i+1]; break;
+      }
+    }
+
+    // Interpolate
+    const span = Math.max(hi.t - lo.t, 0.001);
+    const frac = Math.min(1, (tAbs - lo.t) / span);
+    const x = lo.x + (hi.x - lo.x) * frac;
+    const y = lo.y + (hi.y - lo.y) * frac;
+    const vx = (hi.x - lo.x) / span;
+    const vy = (hi.y - lo.y) / span;
+    const spd = lo.spd + (hi.spd - lo.spd) * frac;
+
+    // Check if vehicle is active at this time
+    if (tAbs < frames[0].t - dt || tAbs > frames[frames.length-1].t + dt) return;
+
+    vehicles.push({
+      id: idx,
+      traceId: id,
+      x, y, vx, vy, spd,
+      cpu: (cpuMin + rng() * (cpuMax - cpuMin)) * 1e9,
+      queue: [],
+      busyTime: 0,
+      procAccum: {},
+    });
+  });
+
+  return vehicles;
+}
+
+// ══════════════════════════════════════════════════════════════
+// SIMULATION ENGINE — DATASET MODE
+// ══════════════════════════════════════════════════════════════
+function simulateWithTrace(P, strategy, trace, seed) {
+  const rng = makeRng(seed);
+  const {lam, dsMin, dsMax, cMin, cMax, dlMin, dlMax,
+         commRange, cpuMin, cpuMax, bandwidth, txPower, noiseFloor} = P;
+
+  const {dt, T, ids} = trace;
+  const steps = Math.round(T / dt);
+
+  // Pre-assign stable CPU to each vehicle ID (consistent across strategies)
+  const cpuMap = {};
+  ids.forEach(id => { cpuMap[id] = (cpuMin + rng() * (cpuMax - cpuMin)) * 1e9; });
+
+  // Persistent per-vehicle state (queue, busyTime, procAccum) indexed by traceId
+  const vState = {};
+  ids.forEach(id => { vState[id] = {queue:[], busyTime:0, procAccum:{}}; });
+
+  const done = [];
+  const metrics = [];
+  const topoSnapshots = [];
+  let tid = 0, cumCommE = 0;
+  const rrRef = {idx:0};
+
+  for (let step = 0; step < steps; step++) {
+    const t = step * dt;
+
+    // ── Get active vehicles at this timestep ─────────────────
+    const activeIds = ids.filter(id => {
+      const frames = trace.vehicleMap[id];
+      const tAbs = t + trace.t0;
+      return tAbs >= frames[0].t - dt && tAbs <= frames[frames.length-1].t + dt;
+    });
+
+    // Build vehicle objects with current positions + persistent state
+    const vehicles = activeIds.map((id, idx) => {
+      const frames = trace.vehicleMap[id];
+      const tAbs = t + trace.t0;
+      let lo = frames[0], hi = frames[frames.length-1];
+      for (let i = 0; i < frames.length-1; i++) {
+        if (frames[i].t <= tAbs && frames[i+1].t >= tAbs) {lo=frames[i];hi=frames[i+1];break;}
+      }
+      const span = Math.max(hi.t-lo.t, 0.001);
+      const frac = Math.min(1, (tAbs-lo.t)/span);
+      const x = lo.x+(hi.x-lo.x)*frac;
+      const y = lo.y+(hi.y-lo.y)*frac;
+      const vx= (hi.x-lo.x)/span;
+      const vy= (hi.y-lo.y)/span;
+      const st = vState[id];
+      return {id:idx, traceId:id, x, y, vx, vy,
+              cpu:cpuMap[id],
+              queue:st.queue, busyTime:st.busyTime, procAccum:st.procAccum};
+    });
+
+    const N = vehicles.length;
+    if (N === 0) continue;
+
+    // ── Expire tasks ─────────────────────────────────────────
+    vehicles.forEach(v => {
+      const expired = v.queue.filter(tk => tk.startTime===null && tk.deadline < t);
+      expired.forEach(tk => { tk.completionTime=t; tk.missedDeadline=true; done.push({...tk}); });
+      v.queue.splice(0, v.queue.length, ...v.queue.filter(tk => !(tk.startTime===null && tk.deadline<t)));
+    });
+
+    // ── Poisson task arrival (rate scales with active vehicles) ─
+    // Arrival rate proportional to vehicle density
+    const lambda = lam * dt * (N / Math.max(ids.length, 1));
+    let L=Math.exp(-lambda), p=1.0, nc=0;
+    do{p*=rng();nc++;}while(p>L); nc--;
+    for (let i=0; i<nc; i++) {
+      const ov = vehicles[Math.floor(rng()*N)];
+      const task = {
+        id:tid++, origin:ov.traceId, assignedTo:ov.traceId,
+        dataSize:(dsMin+rng()*(dsMax-dsMin))*1e3,
+        cycles:  (cMin +rng()*(cMax -cMin ))*1e6,
+        deadline: t+dlMin+rng()*(dlMax-dlMin),
+        arrivalTime:t, startTime:null, completionTime:null,
+        offloaded:false, missedDeadline:false, _lock:false,
+      };
+      ov.queue.push(task);
+    }
+
+    // ── Connectivity & offloading ─────────────────────────────
+    const nb = buildNb(vehicles, commRange);
+    let moves = [];
+    if      (strategy==='V2V_Greedy') moves=v2vGreedy(vehicles,nb,P);
+    else if (strategy==='NEAREST')      moves=nearest(vehicles,nb);
+    else if (strategy==='RANDOM')       moves=randomOffload(vehicles,nb,rng);
+    else if (strategy==='ROUND_ROBIN')  moves=roundRobin(vehicles,nb,rrRef);
+
+    // ── Topology snapshot (every ~1 s of sim time) ────────────
+    if (step % Math.max(1,Math.round(1/dt)) === 0) {
+      topoSnapshots.push(buildTopoFrame(vehicles, nb, moves, t, commRange, bandwidth, txPower, noiseFloor));
+    }
+
+    moves.forEach(({task,from,to}) => {
+      const fv=vehicles[from], tv=vehicles[to];
+      fv.queue.splice(fv.queue.findIndex(tk=>tk.id===task.id),1);
+      task.assignedTo=tv.traceId; task.offloaded=true; task._lock=false;
+      tv.queue.push(task);
+      const d=vdist(fv,tv), rate=channelRate(d,bandwidth,txPower,noiseFloor);
+      cumCommE+=txPower*tx2sec(task.dataSize,rate)*1e3; // mJ
+    });
+    vehicles.forEach(v=>v.queue.forEach(tk=>{tk._lock=false;}));
+
+    // ── FCFS processing ───────────────────────────────────────
+    vehicles.forEach(v => {
+      if (!v.queue.length) return;
+      const task=v.queue[0];
+      if (task.startTime===null) task.startTime=t;
+      if (!v.procAccum[task.id]) v.procAccum[task.id]=0;
+      v.procAccum[task.id]+=dt; v.busyTime+=dt;
+      if (v.procAccum[task.id]>=task.cycles/v.cpu) {
+        task.completionTime=t+dt;
+        task.missedDeadline=task.completionTime>task.deadline;
+        done.push({...task});
+        v.queue.shift(); delete v.procAccum[task.id];
+      }
+    });
+
+    // ── Write state back ──────────────────────────────────────
+    vehicles.forEach(v => {
+      const st=vState[v.traceId];
+      st.queue=v.queue; st.busyTime=v.busyTime; st.procAccum=v.procAccum;
+    });
+
+    // ── Metrics snapshot ──────────────────────────────────────
+    if (step%5===0) {
+      const fin=done.filter(tk=>!tk.missedDeadline);
+      const delays=fin.map(tk=>tk.completionTime-tk.arrivalTime);
+      const avgD=delays.length?delays.reduce((a,b)=>a+b,0)/delays.length:0;
+      const missed=done.filter(tk=>tk.missedDeadline).length;
+      const totalDone=done.length;
+      const avgQ=vehicles.reduce((s,v)=>s+v.queue.length,0)/N;
+      const avgU=vehicles.reduce((s,v)=>s+v.busyTime/Math.max(t+dt,0.001),0)/N;
+      metrics.push({
+        time:parseFloat(t.toFixed(1)),
+        avgDelay:parseFloat(avgD.toFixed(4)),
+        completed:fin.length, missed, total:totalDone,
+        deadlineRatio:totalDone>0?parseFloat((fin.length/totalDone).toFixed(3)):0,
+        avgQueue:parseFloat(avgQ.toFixed(2)),
+        cpuUtil:parseFloat((avgU*100).toFixed(1)),
+        commEnergy:parseFloat(cumCommE.toFixed(2)),
+        commPerTask:fin.length>0?parseFloat((cumCommE/fin.length).toFixed(3)):0,
+        activeVehicles:N,
+      });
+    }
+  }
+
+  const fin=done.filter(tk=>!tk.missedDeadline);
+  const delays=fin.map(tk=>tk.completionTime-tk.arrivalTime);
+  const avgD=delays.length?delays.reduce((a,b)=>a+b,0)/delays.length:0;
+  const offl=fin.filter(tk=>tk.offloaded).length;
+  const avgUtil=ids.reduce((s,id)=>s+vState[id].busyTime/T,0)/ids.length;
+
+  return {
+    metrics, topoSnapshots,
+    mapW: trace.mapW, mapH: trace.mapH,
+    summary:{
+      total:done.length, completed:fin.length, missed:done.filter(tk=>tk.missedDeadline).length,
+      avgDelay:parseFloat(avgD.toFixed(4)),
+      deadlineSat:done.length>0?parseFloat((fin.length/done.length*100).toFixed(1)):0,
+      offloadRatio:fin.length>0?parseFloat((offl/fin.length*100).toFixed(1)):0,
+      commEnergy:parseFloat(cumCommE.toFixed(2)),
+      commPerTask:fin.length>0?parseFloat((cumCommE/fin.length).toFixed(3)):0,
+      cpuUtil:parseFloat((avgUtil*100).toFixed(1)),
+    }
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// SYNTHETIC SIMULATION (fallback, same as original)
+// ══════════════════════════════════════════════════════════════
+function simulateSynthetic(P, strategy, seed) {
+  const rng=makeRng(seed);
+  const{N,T,dt,lam,dsMin,dsMax,cMin,cMax,dlMin,dlMax,
+        commRange,mapSize,maxSpeed,cpuMin,cpuMax,bandwidth,txPower,noiseFloor}=P;
+  const vehicles=Array.from({length:N},(_,id)=>({
+    id,x:rng()*mapSize,y:rng()*mapSize,
+    vx:(rng()-0.5)*maxSpeed*2,vy:(rng()-0.5)*maxSpeed*2,
+    cpu:(cpuMin+rng()*(cpuMax-cpuMin))*1e9,queue:[],busyTime:0,procAccum:{},
+  }));
+  const done=[],metrics=[],topoSnapshots=[];
+  let tid=0,cumCommE=0;
+  const rrRef={idx:0};
+  const steps=Math.round(T/dt);
+  for(let step=0;step<steps;step++){
+    const t=step*dt;
+    vehicles.forEach(v=>{
+      v.x+=v.vx*dt;v.y+=v.vy*dt;
+      if(v.x<=0||v.x>=mapSize){v.vx*=-1;v.x=Math.max(0,Math.min(mapSize,v.x));}
+      if(v.y<=0||v.y>=mapSize){v.vy*=-1;v.y=Math.max(0,Math.min(mapSize,v.y));}
+    });
+    vehicles.forEach(v=>{
+      v.queue.filter(tk=>tk.startTime===null&&tk.deadline<t).forEach(tk=>{
+        tk.completionTime=t;tk.missedDeadline=true;done.push({...tk});});
+      v.queue=v.queue.filter(tk=>!(tk.startTime===null&&tk.deadline<t));
+    });
+    const lambda=lam*dt;
+    let L=Math.exp(-lambda),p=1.0,nc=0;
+    do{p*=rng();nc++;}while(p>L);nc--;
+    for(let i=0;i<nc;i++){
+      const ov=vehicles[Math.floor(rng()*N)];
+      ov.queue.push({id:tid++,origin:ov.id,assignedTo:ov.id,
+        dataSize:(dsMin+rng()*(dsMax-dsMin))*1e3,cycles:(cMin+rng()*(cMax-cMin))*1e6,
+        deadline:t+dlMin+rng()*(dlMax-dlMin),arrivalTime:t,
+        startTime:null,completionTime:null,offloaded:false,missedDeadline:false,_lock:false});
+    }
+    const nb=buildNb(vehicles,commRange);
+    let moves=[];
+    if(strategy==='V2V_Greedy')moves=v2vGreedy(vehicles,nb,P);
+    else if(strategy==='NEAREST')moves=nearest(vehicles,nb);
+    else if(strategy==='RANDOM')moves=randomOffload(vehicles,nb,rng);
+    else if(strategy==='ROUND_ROBIN')moves=roundRobin(vehicles,nb,rrRef);
+
+    // topology snapshot every ~1 s
+    if(step%Math.max(1,Math.round(1/dt))===0)
+      topoSnapshots.push(buildTopoFrame(vehicles,nb,moves,t,commRange,bandwidth,txPower,noiseFloor));
+
+    moves.forEach(({task,from,to})=>{
+      vehicles[from].queue=vehicles[from].queue.filter(tk=>tk.id!==task.id);
+      task.assignedTo=to;task.offloaded=true;task._lock=false;vehicles[to].queue.push(task);
+      const d=vdist(vehicles[from],vehicles[to]),rate=channelRate(d,bandwidth,txPower,noiseFloor);
+      cumCommE+=txPower*tx2sec(task.dataSize,rate)*1e3;
+    });
+    vehicles.forEach(v=>v.queue.forEach(tk=>{tk._lock=false;}));
+    vehicles.forEach(v=>{
+      if(!v.queue.length)return;
+      const task=v.queue[0];
+      if(task.startTime===null)task.startTime=t;
+      if(!v.procAccum[task.id])v.procAccum[task.id]=0;
+      v.procAccum[task.id]+=dt;v.busyTime+=dt;
+      if(v.procAccum[task.id]>=task.cycles/v.cpu){
+        task.completionTime=t+dt;task.missedDeadline=task.completionTime>task.deadline;
+        done.push({...task});v.queue.shift();delete v.procAccum[task.id];
+      }
+    });
+    if(step%5===0){
+      const fin=done.filter(tk=>!tk.missedDeadline);
+      const delays=fin.map(tk=>tk.completionTime-tk.arrivalTime);
+      const avgD=delays.length?delays.reduce((a,b)=>a+b,0)/delays.length:0;
+      const missed=done.filter(tk=>tk.missedDeadline).length;
+      const avgQ=vehicles.reduce((s,v)=>s+v.queue.length,0)/N;
+      const avgU=vehicles.reduce((s,v)=>s+v.busyTime/Math.max(t+dt,0.001),0)/N;
+      metrics.push({
+        time:parseFloat(t.toFixed(1)),avgDelay:parseFloat(avgD.toFixed(4)),
+        completed:fin.length,missed,total:done.length,
+        deadlineRatio:done.length>0?parseFloat((fin.length/done.length).toFixed(3)):0,
+        avgQueue:parseFloat(avgQ.toFixed(2)),cpuUtil:parseFloat((avgU*100).toFixed(1)),
+        commEnergy:parseFloat(cumCommE.toFixed(2)),
+        commPerTask:fin.length>0?parseFloat((cumCommE/fin.length).toFixed(3)):0,
+        activeVehicles:N,
+      });
+    }
+  }
+  const fin=done.filter(tk=>!tk.missedDeadline);
+  const delays=fin.map(tk=>tk.completionTime-tk.arrivalTime);
+  const avgD=delays.length?delays.reduce((a,b)=>a+b,0)/delays.length:0;
+  const offl=fin.filter(tk=>tk.offloaded).length;
+  const avgUtil=vehicles.reduce((s,v)=>s+v.busyTime/T,0)/N;
+  return{
+    metrics, topoSnapshots,
+    mapW:mapSize, mapH:mapSize,
+    summary:{
+      total:done.length,completed:fin.length,missed:done.filter(tk=>tk.missedDeadline).length,
+      avgDelay:parseFloat(avgD.toFixed(4)),
+      deadlineSat:done.length>0?parseFloat((fin.length/done.length*100).toFixed(1)):0,
+      offloadRatio:fin.length>0?parseFloat((offl/fin.length*100).toFixed(1)):0,
+      commEnergy:parseFloat(cumCommE.toFixed(2)),
+      commPerTask:fin.length>0?parseFloat((cumCommE/fin.length).toFixed(3)):0,
+      cpuUtil:parseFloat((avgUtil*100).toFixed(1)),
+    }
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// UI CONFIG
+// ══════════════════════════════════════════════════════════════
+const STRATS={
+  V2V_Greedy:{label:'V2V Greedy',color:'#4db8ff'},
+  LOCAL_ONLY:  {label:'Local Only',  color:'#ff4080'},
+  RANDOM:      {label:'Random',      color:'#ffcc00'},
+  NEAREST:     {label:'Nearest',     color:'#b060ff'},
+  ROUND_ROBIN: {label:'Round Robin', color:'#ff8040'},
+};
+
+const SLIDERS=[
+  {id:'dsMin',lbl:'Data Min',     min:10, max:500, step:10,  def:100, unit:' kb', pid:'sr-dsMin'},
+  {id:'dsMax',lbl:'Data Max',     min:100,max:5000,step:100, def:1000,unit:' kb', pid:'sr-dsMax'},
+  {id:'cMin', lbl:'Cycles Min',   min:100,max:1000,step:100, def:500, unit:' M',  pid:'sr-cMin'},
+  {id:'cMax', lbl:'Cycles Max',   min:500,max:5000,step:500, def:2000,unit:' M',  pid:'sr-cMax'},
+  {id:'dlMin',lbl:'Deadline Min', min:1,  max:10,  step:1,   def:2,   unit:' s',  pid:'sr-dlMin'},
+  {id:'dlMax',lbl:'Deadline Max', min:3,  max:30,  step:1,   def:6,   unit:' s',  pid:'sr-dlMax'},
+  {id:'R',    lbl:'Comm Range',   min:50, max:500, step:10,  def:100, unit:' m',  pid:'sr-R'},
+  {id:'lam',  lbl:'Arrival Rate', min:1,  max:20,  step:1,   def:8,   unit:'/s',  pid:'sr-lam'},
+  {id:'cpuMin',lbl:'CPU Min',     min:0.5,max:3,   step:0.5, def:0.5, unit:' GHz',pid:'sr-cpuMin'},
+  {id:'cpuMax',lbl:'CPU Max',     min:1,  max:8,   step:0.5, def:1.5, unit:' GHz',pid:'sr-cpuMax'},
+  {id:'N',    lbl:'Vehicles',     min:5,  max:100, step:5,   def:25,  unit:'',    pid:'sr-N'},
+  {id:'T',    lbl:'Duration',     min:30, max:300, step:30,  def:120, unit:' s',  pid:'sr-T'},
+  {id:'spd',  lbl:'Max Speed',    min:5,  max:60,  step:5,   def:20,  unit:' m/s',pid:'sr-spd'},
+  {id:'seed', lbl:'Seed',         min:1,  max:999, step:1,   def:42,  unit:'',    pid:'sr-seed'},
+];
+
+function initSliders(){
+  SLIDERS.forEach(s=>{
+    appState.P[s.id]=s.def;
+    const el=document.getElementById(s.pid);
+    if(!el)return;
+    el.innerHTML=`<div class="sr-top"><span>${s.lbl}</span><span class="v" id="v-${s.id}">${s.def}${s.unit}</span></div>
+      <input type="range" id="sl-${s.id}" min="${s.min}" max="${s.max}" step="${s.step}" value="${s.def}"/>`;
+    document.getElementById(`sl-${s.id}`).addEventListener('input',function(){
+      const v=parseFloat(this.value);
+      document.getElementById(`v-${s.id}`).textContent=v+s.unit;
+      appState.P[s.id]=v;
+    });
+  });
+}
+
+function initPills(){
+  const c=document.getElementById('pills');
+  Object.entries(STRATS).forEach(([k,s])=>{
+    const b=document.createElement('button');
+    b.className='pill'+(appState.sel[k]?' on':'');
+    b.textContent=s.label;b.style.setProperty('--c',s.color);
+    b.onclick=()=>{appState.sel[k]=!appState.sel[k];b.className='pill'+(appState.sel[k]?' on':'');};
+    c.appendChild(b);
+  });
+}
+
+function initLegend(){
+  const c=document.getElementById('legend');
+  Object.entries(STRATS).forEach(([k,s])=>{
+    c.innerHTML+=`<div class="leg-row"><div class="leg-dot" style="background:${s.color}"></div><span style="font-size:10px;color:var(--t2)">${s.label}</span></div>`;
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// DATASET TAB SWITCHING
+// ══════════════════════════════════════════════════════════════
+function setDsTab(mode, btn) {
+  appState.dsMode = mode;
+  document.querySelectorAll('.dstab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  ['sumo','tapas','generic','synthetic'].forEach(m=>{
+    const el=document.getElementById('tab-'+m);
+    if(el) el.style.display = m===mode ? '' : 'none';
+  });
+}
+
+// ══════════════════════════════════════════════════════════════
+// FILE LOADING
+// ══════════════════════════════════════════════════════════════
+function dropFile(e, mode) {
+  e.preventDefault();
+  document.getElementById('zone-'+mode).classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file, mode);
+}
+
+function loadFile(e, mode) {
+  const file = e.target.files[0];
+  if (file) processFile(file, mode);
+}
+
+function processFile(file, mode) {
+  const status = document.getElementById('status-'+mode);
+  status.style.display = 'block';
+  status.className = 'upload-status';
+  status.textContent = `⏳ Reading ${file.name} (${(file.size/1024/1024).toFixed(1)} MB)…`;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      let trace;
+      if (mode === 'sumo') {
+        trace = parseSumoFCD(e.target.result);
+      } else {
+        trace = parseCSV(e.target.result, mode);
+      }
+      appState.trace = trace;
+      showTraceStats(trace, status, file.name);
+      document.getElementById('mode-badge').textContent = 'REAL DATASET';
+      document.getElementById('mode-badge').className = 'mode-badge real';
+    } catch(err) {
+      status.className = 'upload-status err';
+      status.textContent = '❌ ' + err.message;
+      appState.trace = null;
+    }
+  };
+  reader.onerror = () => {
+    status.className = 'upload-status err';
+    status.textContent = '❌ Failed to read file.';
+  };
+
+  // Use text for XML/CSV; limit to 50MB
+  if (file.size > 50 * 1024 * 1024) {
+    status.className = 'upload-status err';
+    status.textContent = '❌ File too large (max 50 MB). For large traces, downsample time steps or crop to a region.';
+    return;
+  }
+  reader.readAsText(file);
+}
+
+function showTraceStats(trace, status, filename) {
+  status.className = 'upload-status ok';
+  const avgSpd = trace.ids.flatMap(id => trace.vehicleMap[id].map(f=>f.spd))
+    .reduce((a,b)=>a+b,0) / trace.ids.flatMap(id=>trace.vehicleMap[id]).length;
+
+  status.innerHTML = `✅ <strong>${filename}</strong> loaded successfully<br>
+    ${trace.N} vehicles · ${trace.times.length} timesteps · T=${trace.T.toFixed(1)}s · dt=${trace.dt.toFixed(2)}s · 
+    Map: ${trace.mapW.toFixed(0)}×${trace.mapH.toFixed(0)} m · Avg speed: ${avgSpd.toFixed(1)} m/s
+    ${trace.isGeo ? ' · <span style="color:var(--warn)">Geo-coords converted to metres</span>' : ''}`;
+
+  document.getElementById('ds-stats').style.display = 'block';
+  document.getElementById('ds-info').innerHTML = `
+    <div class="ds-stat"><div class="dv">${trace.N}</div><div class="dl">Vehicles</div></div>
+    <div class="ds-stat"><div class="dv">${trace.times.length}</div><div class="dl">Timesteps</div></div>
+    <div class="ds-stat"><div class="dv">${trace.T.toFixed(0)}s</div><div class="dl">Duration</div></div>
+    <div class="ds-stat"><div class="dv">${trace.dt.toFixed(2)}s</div><div class="dl">Time Step</div></div>
+    <div class="ds-stat"><div class="dv">${avgSpd.toFixed(1)}</div><div class="dl">Avg Speed (m/s)</div></div>
+    <div class="ds-stat"><div class="dv">${trace.mapW.toFixed(0)}m</div><div class="dl">Map Width</div></div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// RUN ALL STRATEGIES
+// ══════════════════════════════════════════════════════════════
+async function runAll() {
+  const strats = Object.keys(appState.sel).filter(k=>appState.sel[k]);
+  if (!strats.length) { alert('Select at least one strategy.'); return; }
+
+  const P = buildParams();
+  const useTrace = appState.dsMode !== 'synthetic' && appState.trace;
+  if (appState.dsMode !== 'synthetic' && !appState.trace) {
+    alert('No dataset loaded. Upload a file or switch to Synthetic mode.');
+    return;
+  }
+
+  const btn=document.getElementById('run-btn');
+  const prog=document.getElementById('prog');
+  const status=document.getElementById('pstatus');
+  btn.disabled=true; btn.textContent='Simulating…';
+  Object.values(appState.charts).forEach(c=>c.destroy());
+  appState.charts={};
+
+  const results={};
+  for (let i=0; i<strats.length; i++) {
+    prog.style.width=Math.round(i/strats.length*100)+'%';
+    status.textContent=`Running ${STRATS[strats[i]].label}…`;
+    await new Promise(r=>setTimeout(r,10));
+    if (useTrace) {
+      results[strats[i]] = simulateWithTrace(P, strats[i], appState.trace, P.seed);
+    } else {
+      results[strats[i]] = simulateSynthetic(P, strats[i], P.seed);
+    }
+  }
+  prog.style.width='100%';
+  status.textContent=`Done ✓  (${useTrace?'real dataset':'synthetic'})`;
+  render(results);
+  btn.disabled=false; btn.textContent='▶ RUN SIMULATION';
+}
+
+function buildParams(){
+  const s=appState.P;
+  return{
+    N:s.N, T:appState.trace?appState.trace.T:s.T, dt:appState.trace?appState.trace.dt:0.5,
+    lam:s.lam, dsMin:s.dsMin, dsMax:s.dsMax, cMin:s.cMin, cMax:s.cMax,
+    dlMin:s.dlMin, dlMax:s.dlMax, commRange:s.R, mapSize:500,
+    maxSpeed:s.spd, cpuMin:s.cpuMin, cpuMax:s.cpuMax,
+    bandwidth:5e6, txPower:0.2, noiseFloor:1e-13, kappa:1e-27, seed:s.seed,
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════════════
+function render(res){
+  document.getElementById('empty').style.display='none';
+  document.getElementById('results').style.display='block';
+  renderCards(res);
+  renderTabs(res);
+}
+
+function renderCards(res){
+  const c=document.getElementById('scards'); c.innerHTML='';
+  Object.entries(res).forEach(([s,r])=>{
+    const col=STRATS[s].color,sm=r.summary;
+    c.innerHTML+=`<div class="scard" style="border-color:${col}44">
+      <div class="sname" style="color:${col}">${STRATS[s].label.toUpperCase()}</div>
+      <div class="mgrid">
+        <div class="mi"><div class="mv" style="color:${col}">${sm.avgDelay.toFixed(3)}s</div><div class="ml">Avg Delay</div></div>
+        <div class="mi"><div class="mv" style="color:${col}">${sm.deadlineSat}%</div><div class="ml">Deadline Sat.</div></div>
+        <div class="mi"><div class="mv" style="color:${col}">${sm.completed}</div><div class="ml">Completed</div></div>
+        <div class="mi"><div class="mv" style="color:${col}">${sm.missed}</div><div class="ml">Missed DL</div></div>
+        <div class="mi"><div class="mv" style="color:${col}">${sm.commPerTask.toFixed(2)}mJ</div><div class="ml">CommE/Task ★</div></div>
+        <div class="mi"><div class="mv" style="color:${col}">${sm.offloadRatio}%</div><div class="ml">Offload Ratio</div></div>
+      </div></div>`;
+  });
+}
+
+const TABS_DEF=[
+  {id:'topo', lbl:'🔗 Topology'},
+  {id:'delay',lbl:'⏱ Delay'},{id:'tasks',lbl:'✅ Tasks & DL'},
+  {id:'energy',lbl:'⚡ CommE/Task'},{id:'queue',lbl:'📊 Queue'},
+  {id:'bar',lbl:'📈 Summary'},
+];
+
+function renderTabs(res){
+  const te=document.getElementById('tabs'),pe=document.getElementById('panels');
+  te.innerHTML='';pe.innerHTML='';
+  TABS_DEF.forEach((t,i)=>{
+    const btn=document.createElement('button');
+    btn.className='tab'+(i===0?' on':'');btn.textContent=t.lbl;
+    btn.onclick=()=>{
+      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+      btn.classList.add('on');document.getElementById('p-'+t.id).classList.add('on');
+    };
+    te.appendChild(btn);
+    const p=document.createElement('div');
+    p.className='panel'+(i===0?' on':'');p.id='p-'+t.id;
+    pe.appendChild(p);
+  });
+  renderTopology(res);renderDelay(res);renderTasks(res);renderEnergy(res);
+  renderQueue(res);renderBars(res);
+}
+
+const AXES={
+  x:{type:'linear',grid:{color:'#dde3ee'},ticks:{color:'#6b7a99',font:{size:10}},
+     title:{display:true,text:'Time (s)',color:'#6b7a99',font:{size:10}}},
+  y:{grid:{color:'#dde3ee'},ticks:{color:'#6b7a99',font:{size:10}}},
+};
+const TT={backgroundColor:'#0d1423',borderColor:'#1c2a42',borderWidth:1,
+  titleColor:'#1a2340',bodyColor:'#3a4a6a',
+  callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(3)}`}};
+
+function mkCard(pid,cid,title){
+  document.getElementById(pid).innerHTML+=`<div class="cc">
+    <div class="cc-hdr"><span class="cc-title">${title}</span>
+    <button class="dlbtn" onclick="dlChart('${cid}','${title}')">⬇ PNG</button></div>
+    <div style="position:relative"><canvas id="${cid}" height="280"></canvas></div></div>`;
+}
+
+function mkLine(cid,datasets,yLabel,yMin,yMax){
+  const ctx=document.getElementById(cid); if(!ctx)return;
+  if(appState.charts[cid])appState.charts[cid].destroy();
+  const yAxis={...AXES.y,title:{display:true,text:yLabel,color:'#5a7090',font:{size:10}}};
+  if(yMin!==undefined)yAxis.min=yMin; if(yMax!==undefined)yAxis.max=yMax;
+  appState.charts[cid]=new Chart(ctx,{type:'line',data:{datasets},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{labels:{color:'#3a4a6a',font:{size:11,family:'JetBrains Mono'},boxWidth:14}},tooltip:TT},
+      scales:{x:AXES.x,y:yAxis}}});
+}
+
+function ds(res,key){
+  return Object.entries(res).map(([s,r])=>({
+    label:STRATS[s].label,
+    data:r.metrics.map(m=>({x:m.time,y:m[key]})),
+    borderColor:STRATS[s].color,backgroundColor:STRATS[s].color+'18',
+    borderWidth:2,pointRadius:0,tension:0.3,fill:false,
+  }));
+}
+
+function renderDelay(res){
+  mkCard('p-delay','c-delay','AVERAGE TASK COMPLETION DELAY (s)');
+  requestAnimationFrame(()=>mkLine('c-delay',ds(res,'avgDelay'),'Avg Delay (s)'));
+}
+function renderTasks(res){
+  mkCard('p-tasks','c-comp','COMPLETED TASKS (before deadline)');
+  mkCard('p-tasks','c-dlr','DEADLINE SATISFACTION RATIO (0–1)');
+  requestAnimationFrame(()=>{
+    mkLine('c-comp',ds(res,'completed'),'Tasks');
+    mkLine('c-dlr', ds(res,'deadlineRatio'),'Ratio',0,1);
+  });
+}
+function renderEnergy(res){
+  document.getElementById('p-energy').innerHTML=`
+    <div style="background:#f1f4f9;border:1px solid #dde3ee;border-radius:10px;padding:12px 15px;margin-bottom:14px;font-size:11px;color:#6b7a99;line-height:1.7">
+      ⚡ <strong style="color:#1a2340">Comm. Energy/Task</strong> is the only meaningful energy comparison across strategies.
+      Computation energy (~1000 mJ/task) is identical for all strategies and is excluded.
+    </div>`;
+  mkCard('p-energy','c-commPerTask','★ COMM. ENERGY PER COMPLETED TASK (mJ/task) — lower = better');
+  mkCard('p-energy','c-commE','CUMULATIVE COMM. ENERGY (mJ) — raw total');
+  requestAnimationFrame(()=>{
+    mkLine('c-commPerTask',ds(res,'commPerTask'),'mJ / task');
+    mkLine('c-commE',ds(res,'commEnergy'),'mJ');
+  });
+}
+function renderQueue(res){
+  mkCard('p-queue','c-queue','AVERAGE QUEUE LENGTH PER VEHICLE');
+  mkCard('p-queue','c-cpu','AVERAGE CPU UTILIZATION (%)');
+  requestAnimationFrame(()=>{
+    mkLine('c-queue',ds(res,'avgQueue'),'Tasks');
+    mkLine('c-cpu',  ds(res,'cpuUtil'), 'Util (%)',0,100);
+  });
+}
+
+const BAR_METRICS=[
+  {key:'avgDelay',    title:'AVG DELAY (s)',                       note:'lower = better'},
+  {key:'deadlineSat', title:'DEADLINE SATISFACTION (%)',           note:'higher = better'},
+  {key:'completed',   title:'COMPLETED TASKS',                     note:'higher = better'},
+  {key:'missed',      title:'MISSED DEADLINES',                    note:'lower = better'},
+  {key:'commPerTask', title:'★ COMM. ENERGY/TASK (mJ)',            note:'lower = better'},
+  {key:'cpuUtil',     title:'CPU UTILIZATION (%)',                  note:''},
+  {key:'offloadRatio',title:'OFFLOAD RATIO (%)',                   note:''},
+];
+
+function renderBars(res){
+  const p=document.getElementById('p-bar');
+  p.innerHTML='<div class="bgrid" id="bgrid"></div>';
+  BAR_METRICS.forEach(m=>{
+    const cid='bar-'+m.key;
+    document.getElementById('bgrid').innerHTML+=`<div class="cc" style="margin-bottom:0">
+      <div class="cc-hdr"><span class="cc-title">${m.title}${m.note?' — '+m.note:''}</span>
+      <button class="dlbtn" onclick="dlChart('${cid}','${m.title}')">⬇ PNG</button></div>
+      <div style="position:relative"><canvas id="${cid}" height="200"></canvas></div></div>`;
+  });
+  requestAnimationFrame(()=>{
+    BAR_METRICS.forEach(m=>{
+      const ctx=document.getElementById('bar-'+m.key); if(!ctx)return;
+      const keys=Object.keys(res);
+      if(appState.charts['bar-'+m.key])appState.charts['bar-'+m.key].destroy();
+      appState.charts['bar-'+m.key]=new Chart(ctx,{type:'bar',
+        data:{labels:keys.map(k=>STRATS[k].label),datasets:[{
+          data:keys.map(k=>res[k].summary[m.key]),
+          backgroundColor:keys.map(k=>STRATS[k].color+'cc'),
+          borderColor:keys.map(k=>STRATS[k].color),
+          borderWidth:1,borderRadius:4,
+        }]},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},tooltip:{backgroundColor:'#ffffff',borderColor:'#dde3ee',borderWidth:1,titleColor:'#1a2340',bodyColor:'#3a4a6a'}},
+          scales:{x:{grid:{color:'#dde3ee'},ticks:{color:'#3a4a6a',font:{size:10,family:'JetBrains Mono'}}},
+                  y:{grid:{color:'#dde3ee'},ticks:{color:'#6b7a99',font:{size:10}}}}}});
+    });
+  });
+}
+
+function dlChart(cid,title){
+  const canvas=document.getElementById(cid); if(!canvas)return;
+  const off=document.createElement('canvas');
+  off.width=canvas.width;off.height=canvas.height;
+  const ctx=off.getContext('2d');
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,off.width,off.height);
+  ctx.drawImage(canvas,0,0);
+  const a=document.createElement('a');
+  a.download=title.replace(/[^a-z0-9]/gi,'_').toLowerCase()+'.png';
+  a.href=off.toDataURL('image/png');a.click();
+}
+
+// ══════════════════════════════════════════════════════════════
+// TOPOLOGY ENGINE
+// ══════════════════════════════════════════════════════════════
+
+// Build a single topology snapshot from a simulation step
+function buildTopoFrame(vehicles,nb,moves,t,commRange,bw,txP,nf){
+  const vSnap=vehicles.map((v,i)=>({
+    i, id:v.traceId!==undefined?String(v.traceId):String(v.id),
+    x:v.x, y:v.y, vx:v.vx||0, vy:v.vy||0,
+    qlen:v.queue.length,
+    proc:Object.keys(v.procAccum||{}).length>0,
+    cpu:v.cpu,
+  }));
+  // links with SNR quality
+  const links=[];
+  for(let i=0;i<vehicles.length;i++){
+    for(let j=i+1;j<vehicles.length;j++){
+      const d=vdist(vehicles[i],vehicles[j]);
+      if(d<=commRange){
+        const snr=txP/(nf*Math.pow(Math.max(d,1)/10,3.5));
+        const rateMbps=bw*Math.log2(1+snr)/1e6;
+        links.push({i,j,d:+d.toFixed(1),snr:+Math.min(snr,1e5).toFixed(1),r:+rateMbps.toFixed(2)});
+      }
+    }
+  }
+  // active offload transfers
+  const offloads=moves.map(m=>{
+    const fv=vehicles[m.from],tv=vehicles[m.to];
+    return{fx:fv.x,fy:fv.y,tx:tv.x,ty:tv.y,
+           fid:vSnap[m.from].id,tid2:vSnap[m.to].id,
+           kb:m.task?(m.task.dataSize/1000).toFixed(0):'?'};
+  });
+  return{t:+t.toFixed(2),v:vSnap,links,offloads};
+}
+
+// Topology playback state
+const TP={
+  data:{},        // stratKey → {topoSnapshots, mapW, mapH}
+  strat:null,     // active strategy
+  fi:0,           // frame index
+  playing:false,
+  speed:1,
+  hov:null,       // hovered vehicle index
+  raf:null,
+  lastTs:0,
+};
+
+function renderTopology(res){
+  const pid='p-topo';
+  const strats=Object.keys(res);
+  if(!strats.length)return;
+
+  // Store snapshot data
+  strats.forEach(s=>{
+    TP.data[s]={
+      frames:res[s].topoSnapshots||[],
+      mapW:res[s].mapW||500,
+      mapH:res[s].mapH||500,
+    };
+  });
+  TP.strat=strats[0];
+  TP.fi=0; TP.playing=false; TP.hov=null;
+
+  const maxF=Math.max(...strats.map(s=>TP.data[s].frames.length));
+
+  // Build strategy selector pills
+  const pillsHtml=strats.map(s=>`
+    <button class="tstrat-pill${s===TP.strat?' on':''}"
+      style="--c:${STRATS[s].color}"
+      onclick="tpSelectStrat('${s}',this)">${STRATS[s].label}</button>`).join('');
+
+  document.getElementById(pid).innerHTML=`
+  <div class="topo-shell">
+
+    <!-- header controls -->
+    <div class="topo-top">
+      <div class="topo-heading">
+        🔗 VEHICLE CONNECTIVITY MAP
+        <span class="topo-badge" id="tp-link-badge">— links</span>
+      </div>
+      <div class="topo-ctrls">
+        <button class="tbtn" id="tp-play" onclick="tpPlay()">▶ Play</button>
+        <button class="tbtn" onclick="tpStep(-1)">◀</button>
+        <button class="tbtn" onclick="tpStep(1)">▶</button>
+        <button class="tbtn" onclick="tpReset()">↩</button>
+        <div class="topo-speed-row">
+          Speed
+          <input type="range" min="0.5" max="10" step="0.5" value="1"
+            oninput="TP.speed=+this.value;document.getElementById('tp-spd-lbl').textContent=this.value+'×'"/>
+          <span id="tp-spd-lbl">1×</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- strategy selector -->
+    <div class="topo-strat-row">
+      <span style="font-size:9px;color:var(--t3);font-family:'JetBrains Mono';letter-spacing:1px">STRATEGY</span>
+      ${pillsHtml}
+    </div>
+
+    <!-- canvas -->
+    <div class="topo-canvas-wrap">
+      <canvas id="topo-cv"></canvas>
+      <div class="topo-tooltip" id="tp-tip"></div>
+    </div>
+
+    <!-- timeline scrub -->
+    <div class="topo-timeline-row">
+      <span style="font-size:9px;color:var(--t3);font-family:'JetBrains Mono'">0s</span>
+      <input type="range" id="tp-scrub" min="0" max="${maxF-1}" step="1" value="0"
+        oninput="tpScrub(+this.value)"/>
+      <span class="ttime" id="tp-time">t = 0.0 s</span>
+    </div>
+
+    <!-- info bar -->
+    <div class="topo-info-bar">
+      <div class="tstat">Vehicles: <strong id="tp-n">—</strong></div>
+      <div class="tstat">Links: <strong id="tp-l">—</strong></div>
+      <div class="tstat">Avg degree: <strong id="tp-d">—</strong></div>
+      <div class="tstat">Transfers: <strong id="tp-o">—</strong></div>
+      <div class="tstat" id="tp-hinfo" style="color:var(--t3)">Hover a node for details</div>
+    </div>
+
+    <!-- legend -->
+    <div class="topo-legend-row">
+      <div class="tleg"><div class="tleg-dot" style="background:#64d2a0;border:2px solid #34c07a"></div>Idle</div>
+      <div class="tleg"><div class="tleg-dot" style="background:#2272c3;border:2px solid #1655a0"></div>Processing</div>
+      <div class="tleg"><div class="tleg-dot" style="background:#f59e0b;border:2px solid #d97706"></div>Queue ≥ 3</div>
+      <div class="tleg"><div class="tleg-dot" style="background:#ef4444;border:2px solid #b91c1c"></div>Queue ≥ 6</div>
+      <div class="tleg"><div class="tleg-line" style="background:rgba(0,153,170,0.25)"></div>Weak link</div>
+      <div class="tleg"><div class="tleg-line" style="background:rgba(0,153,170,0.80)"></div>Strong link</div>
+      <div class="tleg"><div class="tleg-line" style="background:#ef4444"></div>Active offload ➤</div>
+    </div>
+
+  </div>`;
+
+  requestAnimationFrame(()=>{ tpResize(); tpDraw(); });
+  window.addEventListener('resize',tpResize);
+
+  const cv=document.getElementById('topo-cv');
+  cv.addEventListener('mousemove',tpHover);
+  cv.addEventListener('mouseleave',()=>{ TP.hov=null; tpDraw(); document.getElementById('tp-tip').style.display='none'; });
+}
+
+function tpSelectStrat(s,btn){
+  TP.strat=s; TP.fi=0; TP.playing=false;
+  document.getElementById('tp-play').textContent='▶ Play';
+  document.getElementById('tp-scrub').value=0;
+  document.querySelectorAll('.tstrat-pill').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  tpDraw();
+}
+
+function tpPlay(){
+  TP.playing=!TP.playing;
+  document.getElementById('tp-play').textContent=TP.playing?'⏸ Pause':'▶ Play';
+  if(TP.playing){ TP.lastTs=0; requestAnimationFrame(tpAnimate); }
+}
+
+function tpReset(){
+  TP.playing=false; TP.fi=0;
+  document.getElementById('tp-play').textContent='▶ Play';
+  document.getElementById('tp-scrub').value=0;
+  tpDraw();
+}
+
+function tpStep(d){
+  TP.playing=false;
+  document.getElementById('tp-play').textContent='▶ Play';
+  const frames=(TP.data[TP.strat]||{}).frames||[];
+  TP.fi=Math.max(0,Math.min(frames.length-1,TP.fi+d));
+  document.getElementById('tp-scrub').value=TP.fi;
+  tpDraw();
+}
+
+function tpScrub(v){
+  TP.playing=false;
+  document.getElementById('tp-play').textContent='▶ Play';
+  TP.fi=v; tpDraw();
+}
+
+function tpAnimate(ts){
+  if(!TP.playing)return;
+  const d=TP.data[TP.strat];
+  if(!d||!d.frames.length)return;
+  const dtMs=1000/TP.speed;
+  if(ts-TP.lastTs>=dtMs){
+    TP.lastTs=ts;
+    TP.fi++;
+    if(TP.fi>=d.frames.length){ TP.fi=d.frames.length-1; TP.playing=false; document.getElementById('tp-play').textContent='▶ Play'; tpDraw(); return; }
+    document.getElementById('tp-scrub').value=TP.fi;
+    tpDraw();
+  }
+  requestAnimationFrame(tpAnimate);
+}
+
+function tpResize(){
+  const cv=document.getElementById('topo-cv'); if(!cv)return;
+  const wrap=cv.parentElement;
+  const W=wrap.clientWidth;
+  const d=TP.data[TP.strat]; if(!d)return;
+  const aspect=d.mapH/d.mapW;
+  const H=Math.min(540,Math.max(300,Math.round(W*aspect)));
+  cv.width=W; cv.height=H;
+  tpDraw();
+}
+
+function tpGetPad(cv){ return{px:28,py:20,dw:cv.width-56,dh:cv.height-40}; }
+
+function tpHover(e){
+  const cv=document.getElementById('topo-cv'); if(!cv)return;
+  const rect=cv.getBoundingClientRect();
+  const mx=(e.clientX-rect.left)*(cv.width/rect.width);
+  const my=(e.clientY-rect.top)*(cv.height/rect.height);
+  const d=TP.data[TP.strat]; if(!d||!d.frames.length)return;
+  const fr=d.frames[Math.min(TP.fi,d.frames.length-1)];
+  const{px,py,dw,dh}=tpGetPad(cv);
+  const sx=dw/d.mapW, sy=dh/d.mapH;
+  let best=null,bd=16;
+  fr.v.forEach((v,i)=>{
+    const cx=px+v.x*sx, cy=py+(d.mapH-v.y)*sy;
+    const dist=Math.sqrt((mx-cx)**2+(my-cy)**2);
+    if(dist<bd){bd=dist;best=i;}
+  });
+  if(best!==TP.hov){ TP.hov=best; tpDraw(); }
+
+  // Floating tooltip
+  const tip=document.getElementById('tp-tip');
+  if(best!==null){
+    const v=fr.v[best];
+    const deg=fr.links.filter(l=>l.i===best||l.j===best).length;
+    const spd=Math.sqrt(v.vx**2+v.vy**2).toFixed(1);
+    tip.innerHTML=`ID: ${v.id}<br>Pos: (${v.x.toFixed(0)}, ${v.y.toFixed(0)}) m<br>Speed: ${spd} m/s<br>CPU: ${(v.cpu/1e9).toFixed(2)} GHz<br>Queue: ${v.qlen} tasks<br>Neighbors: ${deg}`;
+    tip.style.display='block';
+    const tipX=Math.min(e.offsetX+14, cv.clientWidth-140);
+    const tipY=Math.max(e.offsetY-50, 4);
+    tip.style.left=tipX+'px'; tip.style.top=tipY+'px';
+  } else {
+    tip.style.display='none';
+  }
+}
+
+function tpDraw(){
+  const cv=document.getElementById('topo-cv'); if(!cv)return;
+  const ctx=cv.getContext('2d');
+  const W=cv.width, H=cv.height;
+  const d=TP.data[TP.strat]; if(!d){ctx.clearRect(0,0,W,H);return;}
+  const{px,py,dw,dh}=tpGetPad(cv);
+  const sx=dw/d.mapW, sy=dh/d.mapH;
+  const fr=d.frames[Math.min(TP.fi,d.frames.length-1)];
+
+  // Background
+  ctx.fillStyle='#f3f6fc'; ctx.fillRect(0,0,W,H);
+
+  // Grid lines
+  const gStep=Math.round(d.mapW/5);
+  ctx.strokeStyle='#dde5f0'; ctx.lineWidth=0.6;
+  ctx.fillStyle='#b0bad0'; ctx.font='9px JetBrains Mono';
+  for(let gx=0;gx<=d.mapW;gx+=gStep){
+    const cx=px+gx*sx;
+    ctx.beginPath();ctx.moveTo(cx,py);ctx.lineTo(cx,py+dh);ctx.stroke();
+    ctx.fillText(gx+'m',cx+2,py+dh+14);
+  }
+  for(let gy=0;gy<=d.mapH;gy+=gStep){
+    const cy=py+(d.mapH-gy)*sy;
+    ctx.beginPath();ctx.moveTo(px,cy);ctx.lineTo(px+dw,cy);ctx.stroke();
+    ctx.fillText(gy+'m',2,cy-2);
+  }
+
+  // Border
+  ctx.strokeStyle='#c0cbd8'; ctx.lineWidth=1;
+  ctx.strokeRect(px,py,dw,dh);
+
+  if(!fr){ ctx.fillStyle='#a0aec0';ctx.font='14px Inter';ctx.textAlign='center';ctx.fillText('No frames',W/2,H/2);ctx.textAlign='left';return; }
+
+  // ── Communication range ring for hovered vehicle ──────────
+  if(TP.hov!==null && fr.v[TP.hov]){
+    const hv=fr.v[TP.hov];
+    const hcx=px+hv.x*sx, hcy=py+(d.mapH-hv.y)*sy;
+    const R=(appState.P.R||100)*Math.min(sx,sy);
+    ctx.beginPath(); ctx.arc(hcx,hcy,R,0,Math.PI*2);
+    ctx.strokeStyle='rgba(0,153,170,0.22)'; ctx.lineWidth=1.2;
+    ctx.setLineDash([5,4]); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='rgba(0,153,170,0.04)'; ctx.fill();
+  }
+
+  // ── Links ─────────────────────────────────────────────────
+  fr.links.forEach(lk=>{
+    const a=fr.v[lk.i],b=fr.v[lk.j]; if(!a||!b)return;
+    const ax=px+a.x*sx, ay=py+(d.mapH-a.y)*sy;
+    const bx=px+b.x*sx, by=py+(d.mapH-b.y)*sy;
+    // normalised SNR → line weight and opacity
+    const norm=Math.min(1, Math.log10(Math.max(lk.snr,1))/4.5);
+    const alpha=0.08+norm*0.65;
+    const lw=0.7+norm*2.2;
+    // highlight links of hovered vehicle
+    const isHov=TP.hov!==null&&(lk.i===TP.hov||lk.j===TP.hov);
+    ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by);
+    ctx.strokeStyle=isHov?`rgba(0,200,210,${Math.min(1,alpha+0.3)})`:`rgba(0,153,170,${alpha.toFixed(2)})`;
+    ctx.lineWidth=isHov?lw+1:lw;
+    ctx.stroke();
+
+    // Rate label on hovered links
+    if(isHov){
+      const mx=(ax+bx)/2, my=(ay+by)/2;
+      ctx.fillStyle='#0077aa'; ctx.font='bold 9px JetBrains Mono'; ctx.textAlign='center';
+      ctx.fillText(lk.r+' Mb/s',mx,my-5); ctx.textAlign='left';
+    }
+  });
+
+  // ── Offload transfers (animated arrow) ───────────────────
+  fr.offloads.forEach(of=>{
+    const fx=px+of.fx*sx, fy=py+(d.mapH-of.fy)*sy;
+    const tx=px+of.tx*sx, ty=py+(d.mapH-of.ty)*sy;
+    // dashed line
+    ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(tx,ty);
+    ctx.strokeStyle='#ef4444'; ctx.lineWidth=2; ctx.setLineDash([7,4]); ctx.stroke(); ctx.setLineDash([]);
+    // arrowhead
+    const ang=Math.atan2(ty-fy,tx-fx);
+    ctx.beginPath(); ctx.moveTo(tx,ty);
+    ctx.lineTo(tx-10*Math.cos(ang-0.38),ty-10*Math.sin(ang-0.38));
+    ctx.lineTo(tx-10*Math.cos(ang+0.38),ty-10*Math.sin(ang+0.38));
+    ctx.closePath(); ctx.fillStyle='#ef4444'; ctx.fill();
+    // label
+    ctx.fillStyle='#b91c1c'; ctx.font='bold 9px JetBrains Mono'; ctx.textAlign='center';
+    ctx.fillText(of.kb+'kb',(fx+tx)/2,(fy+ty)/2-6); ctx.textAlign='left';
+  });
+
+  // ── Vehicles ─────────────────────────────────────────────
+  fr.v.forEach((v,vi)=>{
+    const cx=px+v.x*sx, cy=py+(d.mapH-v.y)*sy;
+    const isHov=vi===TP.hov;
+    const r=isHov?9:6;
+
+    // Color by task state
+    let fill, stroke;
+    if(v.qlen>=6)      { fill='#ef4444'; stroke='#b91c1c'; }
+    else if(v.qlen>=3) { fill='#f59e0b'; stroke='#d97706'; }
+    else if(v.proc)    { fill='#2272c3'; stroke='#1655a0'; }
+    else               { fill='#64d2a0'; stroke='#34c07a'; }
+
+    // Glow for hovered
+    if(isHov){
+      ctx.beginPath(); ctx.arc(cx,cy,r+5,0,Math.PI*2);
+      ctx.fillStyle=fill+'28'; ctx.fill();
+    }
+
+    // Vehicle dot
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.fillStyle=fill; ctx.strokeStyle=stroke; ctx.lineWidth=1.5;
+    ctx.fill(); ctx.stroke();
+
+    // Velocity direction arrow (when moving)
+    const spd=Math.sqrt(v.vx**2+v.vy**2);
+    if(spd>0.5){
+      const aLen=Math.min(spd*sx*0.35,16);
+      ctx.beginPath(); ctx.moveTo(cx,cy);
+      ctx.lineTo(cx+(v.vx/spd)*aLen, cy-(v.vy/spd)*aLen);
+      ctx.strokeStyle=stroke+'cc'; ctx.lineWidth=1.3; ctx.stroke();
+    }
+
+    // Short ID label beneath
+    ctx.fillStyle='#2a3a5c'; ctx.font=`${isHov?'bold ':''} 8px JetBrains Mono`;
+    ctx.textAlign='center';
+    ctx.fillText(v.id.length>5?v.id.slice(-4):v.id, cx, cy+r+11);
+    ctx.textAlign='left';
+
+    // Queue badge (red dot with count)
+    if(v.qlen>0){
+      ctx.beginPath(); ctx.arc(cx+r-1,cy-r+1,5,0,Math.PI*2);
+      ctx.fillStyle='#dc2626'; ctx.fill();
+      ctx.fillStyle='#fff'; ctx.font='bold 7px Inter'; ctx.textAlign='center';
+      ctx.fillText(v.qlen>9?'9+':v.qlen, cx+r-1,cy-r+4.5);
+      ctx.textAlign='left';
+    }
+  });
+
+  // ── Info bar update ───────────────────────────────────────
+  const nV=fr.v.length, nL=fr.links.length;
+  const avgDeg=nV>0?(nL*2/nV).toFixed(1):'0';
+  const g=id=>document.getElementById(id);
+  if(g('tp-n'))   g('tp-n').textContent=nV;
+  if(g('tp-l'))   g('tp-l').textContent=nL;
+  if(g('tp-d'))   g('tp-d').textContent=avgDeg;
+  if(g('tp-o'))   g('tp-o').textContent=fr.offloads.length;
+  if(g('tp-time'))g('tp-time').textContent='t = '+fr.t.toFixed(1)+' s';
+  if(g('tp-link-badge'))g('tp-link-badge').textContent=nL+' links';
+  if(TP.hov!==null && fr.v[TP.hov]){
+    const hv=fr.v[TP.hov];
+    const deg=fr.links.filter(l=>l.i===TP.hov||l.j===TP.hov).length;
+    if(g('tp-hinfo'))g('tp-hinfo').textContent=`Selected: ${hv.id} · ${deg} neighbors · queue=${hv.qlen}`;
+    g('tp-hinfo').style.color='var(--acc)';
+  } else {
+    if(g('tp-hinfo')){g('tp-hinfo').textContent='Hover a node for details';g('tp-hinfo').style.color='var(--t3)';}
+  }
+}
+
+// ── Boot ──────────────────────────────────────────────────────
+initSliders();
+initPills();
+initLegend();
+</script>
+</body>
+</html>
